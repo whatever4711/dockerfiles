@@ -3,20 +3,33 @@ version: '2'
 networks:
   internal:
     driver: bridge
+  external:
+    driver: bridge
 
 volumes:
   pgdata:
     driver: local
+  static:
+    driver: local
 
 services:
+  caddy:
+    image: zzrot/alpine-caddy #whatever4711/rpi-caddy
+    ports:
+      - "80:80"
+    networks:
+      - internal
+      - external
+
+
   nextcloud:
     build: .
     image: whatever4711/nextcloud:amd64
     depends_on:
       - db
       - redis
-    ports:
-      - "8888:8888"
+    expose:
+      - 9000
     networks:
       - internal
     environment:
