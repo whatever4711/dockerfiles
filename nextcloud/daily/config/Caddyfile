@@ -1,6 +1,6 @@
 0.0.0.0:80 {
 
-    root /var/www/nextcloud
+    root /nextcloud
 
     fastcgi / nextcloud:9000 php {
             env PATH /bin
@@ -27,10 +27,10 @@
     }
 
     # .htacces / data / config / ... shouldn't be accessible from outside
-    rewrite {
-        r  ^/(?:\.htaccess|data|config|db_structure\.xml|README)
-        status 403
-    }
+    #rewrite {
+    #    r  ^/(?:\.htaccess|data|config|db_structure\.xml|README)
+    #    status 403 /
+    #}
 
     header / Strict-Transport-Security "15768000"
 
