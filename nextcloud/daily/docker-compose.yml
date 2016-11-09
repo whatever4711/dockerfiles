@@ -14,7 +14,7 @@ volumes:
 
 services:
   caddy:
-    image: zzrot/alpine-caddy #whatever4711/rpi-caddy
+    image: whatever4711/caddy:amd64 #armhf
     ports:
       - "80:80"
     networks:
