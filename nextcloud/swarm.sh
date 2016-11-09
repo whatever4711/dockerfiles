@@ -36,4 +36,5 @@ docker service create --name cloud_nextcloud --replicas 1 --network cloud_net_in
 --env MEMCACHE_HOST=cloud_memcache \
 --env ADMIN_USER=admin \
 --env ADMIN_PASSWORD=admin \
+--constraint 'node.hostname==sparrow' \
 whatever4711/nextcloud:armhf
