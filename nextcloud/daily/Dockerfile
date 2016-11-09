@@ -23,7 +23,6 @@ RUN echo "@commuedge https://nl.alpinelinux.org/alpine/edge/community" >> /etc/a
     libtool" \
  && apk -U add \
     ${BUILD_DEPS} \
-    nginx \
     s6 \
     libressl \
     ca-certificates \
@@ -79,7 +78,6 @@ RUN echo "@commuedge https://nl.alpinelinux.org/alpine/edge/community" >> /etc/a
  && apk del ${BUILD_DEPS} php7-pear php7-dev \
  && rm -rf /var/cache/apk/* /tmp/*
 
-COPY nginx.conf /etc/nginx/nginx.conf
 COPY php-fpm.conf /etc/php7/php-fpm.conf
 COPY opcache.ini /etc/php7/conf.d/00_opcache.ini
 COPY apcu.ini /etc/php7/conf.d/apcu.ini
@@ -92,7 +90,7 @@ RUN chmod +x /usr/local/bin/* /etc/s6.d/*/* /etc/s6.d/.s6-svscan/*
 
 VOLUME /data /config /apps2
 
-EXPOSE 8888
+EXPOSE 9000
 
 LABEL description="A server software for creating file hosting services" \
       nextcloud="Nextcloud daily build"

@@ -17,15 +17,17 @@ volumes:
 services:
   caddy:
     image: whatever4711/caddy:amd64 #armhf
+    depends_on:
+      - nextcloud
     ports:
       - "80:80"
     volumes:
-      - ./config/Caddyfile:/etc/Caddyfile
+      - ./config/Caddyfile:/root/.caddy/Caddyfile
       - nextcloud:/nextcloud
     networks:
       - internal
       - external
-    #command: --agree --conf /root/.caddy/Caddyfile
+    command: --agree --conf /root/.caddy/Caddyfile
 
 
   nextcloud:
@@ -34,8 +36,8 @@ services:
     depends_on:
       - db
       - redis
-    expose:
-      - 9000
+    ports:
+      - "9000:9000"
     networks:
       - internal
     volumes:
@@ -63,8 +65,6 @@ services:
 
   redis:
     image: redis #armhf/redis
-    #volumes:
-    #  - ./redis.conf:/usr/local/etc/redis/redis.conf
     networks:
       - internal
 
