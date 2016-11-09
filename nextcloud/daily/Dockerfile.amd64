@@ -1,5 +1,5 @@
 FROM alpine:edge
-MAINTAINER Wonderfall <wonderfall@schrodinger.io>
+MAINTAINER Marcel Grossmann <whatever4711@gmail.com>
 
 ARG GNU_LIBICONV_VERSION=1.14
 

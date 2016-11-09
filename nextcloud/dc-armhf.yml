@@ -16,7 +16,7 @@ volumes:
 
 services:
   caddy:
-    image: whatever4711/caddy:amd64 #armhf
+    image: whatever4711/caddy:armhf
     depends_on:
       - nextcloud
     ports:
@@ -31,8 +31,10 @@ services:
 
 
   nextcloud:
-    build: .
-    image: whatever4711/nextcloud:amd64
+    build:
+      context: ./daily
+      dockerfile: Dockerfile.armhf
+    image: whatever4711/nextcloud:armhf
     depends_on:
       - db
       - redis
@@ -54,7 +56,7 @@ services:
 
 
   db:
-    image: whatever4711/postgres:amd64
+    image: whatever4711/postgres:armhf
     restart: always
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -64,12 +66,12 @@ services:
       - internal
 
   redis:
-    image: redis #armhf/redis
+    image: armhf/redis
     networks:
       - internal
 
   memcache:
-    image: memcached:alpine #armhf/memcached:alpine
+    image: armhf/memcached:alpine
     entrypoint: memcached -m 64
     networks:
       - internal
