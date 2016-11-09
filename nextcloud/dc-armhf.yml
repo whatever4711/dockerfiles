@@ -38,8 +38,8 @@ services:
     depends_on:
       - db
       - redis
-    ports:
-      - "9000:9000"
+    expose:
+      - 9000
     networks:
       - internal
     volumes:
