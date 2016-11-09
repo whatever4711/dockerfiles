@@ -7,11 +7,15 @@ networks:
     driver: bridge
 
 volumes:
-  pgdata:
+  pg_data:
     driver: local
-  static:
+  nc_config:
     driver: local
-  nextcloud:
+  nc_data:
+    driver: local
+  nc_apps:
+    driver: local
+  nc_www:
     driver: local
 
 services:
@@ -23,7 +27,7 @@ services:
       - "80:80"
     volumes:
       - ./config/Caddyfile:/root/.caddy/Caddyfile
-      - nextcloud:/nextcloud
+      - nc_www:/nextcloud
     networks:
       - internal
       - external
@@ -36,26 +40,29 @@ services:
       dockerfile: Dockerfile.armhf
     image: whatever4711/nextcloud:armhf
     depends_on:
-      - db
+      - postgres
       - redis
     expose:
       - 9000
     networks:
       - internal
     volumes:
-      - nextcloud:/nextcloud
+      - nc_www:/nextcloud
+      - nc_config:/config
+      - nc_data:/data
+      - nc_apps:/apps
     environment:
       - DB_TYPE=pgsql
       - DB_NAME=nextcloud
       - DB_USER=postgres
       - DB_PASSWORD=postgres
-      - DB_HOST=db
+      - DB_HOST=postgres
       - ADMIN_USER=admin
       - ADMIN_PASSWORD=admin
     entrypoint: run.sh
 
 
-  db:
+  postgres:
     image: whatever4711/postgres:armhf
     restart: always
     volumes:
