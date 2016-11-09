@@ -95,4 +95,4 @@ EXPOSE 9000
 LABEL description="A server software for creating file hosting services" \
       nextcloud="Nextcloud daily build"
 
-CMD ["run.sh"]
+ENTRYPOINT ["run.sh"]
