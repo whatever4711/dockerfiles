@@ -11,15 +11,21 @@ volumes:
     driver: local
   static:
     driver: local
+  nextcloud:
+    driver: local
 
 services:
   caddy:
     image: whatever4711/caddy:amd64 #armhf
     ports:
       - "80:80"
+    volumes:
+      - ./config/Caddyfile:/etc/Caddyfile
+      - nextcloud:/nextcloud
     networks:
       - internal
       - external
+    #command: --agree --conf /root/.caddy/Caddyfile
 
 
   nextcloud:
@@ -32,6 +38,8 @@ services:
       - 9000
     networks:
       - internal
+    volumes:
+      - nextcloud:/nextcloud
     environment:
       - DB_TYPE=pgsql
       - DB_NAME=nextcloud
