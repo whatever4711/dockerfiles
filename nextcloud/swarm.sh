@@ -3,7 +3,7 @@
 docker network create --driver overlay cloud_net_internal
 docker network create --driver overlay cloud_net_external
 
-docker volume create -d nfs --name pg_data -o share=jack.mg:/home/marcel/clouddata/Wedding/pg_data
+docker volume create -d nfs --name pg_data -o share=sparrow.mg:/home/marcel/clouddata/Wedding/pg_data
 
 docker service create --name cloud_postgres --replicas 1 --network cloud_net_internal \
 --mount type=volume,src=pg_data,dst=/var/lib/postgresql/data \
@@ -16,10 +16,10 @@ armhf/redis
 docker service create --name cloud_memcache --replicas 1 --network cloud_net_internal \
 armhf/memcached:alpine
 
-docker volume create -d nfs --name nc_www -o share=jack.mg:/home/marcel/clouddata/Wedding/nc_www
-docker volume create -d nfs --name nc_config -o share=jack.mg:/home/marcel/clouddata/Wedding/nc_config
-docker volume create -d nfs --name nc_data -o share=jack.mg:/home/marcel/clouddata/Wedding/nc_data
-docker volume create -d nfs --name nc_apps -o share=jack.mg:/home/marcel/clouddata/Wedding/nc_apps
+docker volume create -d nfs --name nc_www -o share=sparrow.mg:/home/marcel/clouddata/Wedding/nc_www
+docker volume create -d nfs --name nc_config -o share=sparrow.mg:/home/marcel/clouddata/Wedding/nc_config
+docker volume create -d nfs --name nc_data -o share=sparrow.mg:/home/marcel/clouddata/Wedding/nc_data
+docker volume create -d nfs --name nc_apps -o share=sparrow.mg:/home/marcel/clouddata/Wedding/nc_apps
 
 docker service create --name cloud_nextcloud --replicas 1 --network cloud_net_internal \
 --publish 9000:9000 \
