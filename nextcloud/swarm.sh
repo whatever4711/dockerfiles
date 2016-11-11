@@ -10,7 +10,7 @@ SERVICES=('cloud_postgres' 'cloud_redis' 'cloud_memcache' 'cloud_nextcloud' 'clo
 
 function create() {
   docker network create --driver overlay ${NET}
-  for volume in ${VOLUMES} do
+  for volume in ${VOLUMES}; do
     docker volume create -d nfs --name ${volume} -o share=${SHARE}/${volume}
   done
 }
@@ -67,15 +67,15 @@ function start() {
   create
   createDB
   createRedis
-  createMemcache  
+  createMemcache
 }
 
 function destroy() {
-  for service in ${SERVICES} do
+  for service in ${SERVICES}; do
     docker service rm ${service}
   done
 
-  for volume in ${VOLUMES} do
+  for volume in ${VOLUMES}; do
     docker volume rm ${volume}
   done
 
