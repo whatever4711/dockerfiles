@@ -8,8 +8,8 @@ VOLUMES=( 'nc_db' 'nc_www' 'nc_config' 'nc_data' 'nc_apps' )
 SERVICES=( 'cloud_postgres' 'cloud_redis' 'cloud_memcache' 'cloud_nextcloud' 'cloud_ssh' )
 
 
-function create {
-#Does not work!
+function createBasics {
+  echo "Creating network ${NET}"
 docker network create --driver overlay ${NET}
 for volume in "${VOLUMES[@]}"; do
   echo "Creating volume ${volume}"
@@ -18,6 +18,7 @@ done
 }
 
 function createDB {
+  echo "Creating DB service ${SERVICES[1]} with volume ${VOLUMES[1]}"
 docker service create --name ${SERVICES[1]} --replicas 1 --network ${NET} \
 --mount type=volume,src=${VOLUMES[1]},dst=/var/lib/postgresql/data \
 --constraint 'node.hostname==sparrow' \
@@ -65,11 +66,16 @@ docker service create --name ${SERVICES[5]}--replicas 1 --network ${NET} \
 whatever4711/ssh:armhf
 }
 
-function start {
-  create
+function create {
+  createBasics
   createDB
-  createRedis
-  createMemcache
+  #createRedis
+  #createMemcache
+}
+
+function start {
+  createNextCloud
+  create_ssh
 }
 
 function destroy {
