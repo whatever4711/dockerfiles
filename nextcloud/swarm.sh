@@ -73,11 +73,11 @@ function start {
 }
 
 function destroy {
-  for service in ${SERVICES}; do
+  for service in "${SERVICES[@]}"; do
     docker service rm ${service}
   done
 
-  for volume in ${VOLUMES}; do
+  for volume in "${VOLUMES[@]}"; do
     docker volume rm ${volume}
   done
 
@@ -85,4 +85,25 @@ function destroy {
 
 }
 
-create
+function usage(){
+cat << EOM
+  usage:
+
+  create       create
+  start        start
+  destroy      destroy
+
+EOM
+}
+
+if [ $# -eq 1 ]; then
+  case "$1" in
+    "create")  create;;
+    "start")   start;;
+    "destroy")    destroy;;
+    *) usage;;
+  esac
+else
+  usage
+fi
+exit 0
