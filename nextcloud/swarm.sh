@@ -4,37 +4,39 @@ NET='cloud_net'
 SHARE_HOST='sparrow.mg'
 SHARE_DIR='/home/marcel/clouddata/Wedding'
 SHARE=${SHARE_HOST}:${SHARE_DIR}
-VOLUMES=('nc_db' 'nc_www' 'nc_config' 'nc_data' 'nc_apps')
-SERVICES=('cloud_postgres' 'cloud_redis' 'cloud_memcache' 'cloud_nextcloud' 'cloud_ssh')
+VOLUMES=( 'nc_db' 'nc_www' 'nc_config' 'nc_data' 'nc_apps' )
+SERVICES=( 'cloud_postgres' 'cloud_redis' 'cloud_memcache' 'cloud_nextcloud' 'cloud_ssh' )
 
 
-function create() {
+function create {
+#Does not work!
 docker network create --driver overlay ${NET}
-for volume in ${VOLUMES}; do
+for volume in "${VOLUMES[@]}"; do
+  echo "Creating volume ${volume}"
   docker volume create -d nfs --name ${volume} -o share=${SHARE}/${volume}
 done
 }
 
-function createDB() {
+function createDB {
 docker service create --name ${SERVICES[1]} --replicas 1 --network ${NET} \
 --mount type=volume,src=${VOLUMES[1]},dst=/var/lib/postgresql/data \
 --constraint 'node.hostname==sparrow' \
 whatever4711/postgres:armhf
 }
 
-function createRedis() {
+function createRedis {
 docker service create --name ${SERVICES[2]} --replicas 1 --network ${NET} \
 --constraint 'node.hostname!=jack' \
 armhf/redis
 }
 
-function createMemcache() {
+function createMemcache {
 docker service create --name ${SERVICE[3]} --replicas 1 --network ${NET} \
 --constraint 'node.hostname!=jack' \
 armhf/memcached:alpine
 }
 
-function create nextCloud() {
+function createNextCloud {
 docker service create --name ${SERVICES[4]} --replicas 1 --network ${NET} \
 --publish 9000:9000 \
 --mount type=volume,src=${VOLUMES[2]},dst=/nextcloud \
@@ -54,7 +56,7 @@ docker service create --name ${SERVICES[4]} --replicas 1 --network ${NET} \
 whatever4711/nextcloud:armhf
 }
 
-function create_ssh() {
+function create_ssh {
 docker service create --name ${SERVICES[5]}--replicas 1 --network ${NET} \
 --publish 2222:22 \
 --mount type=volume,src=nc_www,dst=/nextcloud \
@@ -63,14 +65,14 @@ docker service create --name ${SERVICES[5]}--replicas 1 --network ${NET} \
 whatever4711/ssh:armhf
 }
 
-function start() {
+function start {
   create
   createDB
   createRedis
   createMemcache
 }
 
-function destroy() {
+function destroy {
   for service in ${SERVICES}; do
     docker service rm ${service}
   done
@@ -82,3 +84,5 @@ function destroy() {
   docker network rm ${NET}
 
 }
+
+create
