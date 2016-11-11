@@ -38,3 +38,9 @@ docker service create --name cloud_nextcloud --replicas 1 --network cloud_net_in
 --env ADMIN_PASSWORD=admin \
 --constraint 'node.hostname==sparrow' \
 whatever4711/nextcloud:armhf
+
+docker service create --name cloud_ssh --replicas 1 --network cloud_net_internal --network cloud_net_external \
+--publish 2222:22 \
+--mount type=volume,src=nc_www,dst=/nextcloud \
+--constraint 'node.hostname==sparrow' \
+whatever4711/ssh:armhf
