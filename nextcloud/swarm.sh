@@ -1,18 +1,18 @@
 #!/bin/bash
 
-NET=cloud_net
-SHARE_HOST=sparrow.mg
-SHARE_DIR=/home/marcel/clouddata/Wedding
+NET='cloud_net'
+SHARE_HOST='sparrow.mg'
+SHARE_DIR='/home/marcel/clouddata/Wedding'
 SHARE=${SHARE_HOST}:${SHARE_DIR}
 VOLUMES=('nc_db' 'nc_www' 'nc_config' 'nc_data' 'nc_apps')
 SERVICES=('cloud_postgres' 'cloud_redis' 'cloud_memcache' 'cloud_nextcloud' 'cloud_ssh')
 
 
 function create() {
-  docker network create --driver overlay ${NET}
-  for volume in ${VOLUMES}; do
-    docker volume create -d nfs --name ${volume} -o share=${SHARE}/${volume}
-  done
+docker network create --driver overlay ${NET}
+for volume in ${VOLUMES}; do
+  docker volume create -d nfs --name ${volume} -o share=${SHARE}/${volume}
+done
 }
 
 function createDB() {
