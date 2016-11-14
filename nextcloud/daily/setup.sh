@@ -30,7 +30,7 @@ cat > $CONFIGFILE <<EOF;
   'memcache.local' => '\OC\Memcache\APCu',
   'memcache.distributed' => '\OC\Memcache\Memcached',
   'memcached_servers' => array(
-        array('${MEMCACHE_HOST:-memcache}', ${MEMCACHE_PORT:-11211}),
+        ${MEMCACHE_ARRAY:-'array(\'memcache\', 11211)'},
   ),
 
   'memcache.locking' => '\OC\Memcache\Redis',
