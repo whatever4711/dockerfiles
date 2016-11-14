@@ -74,8 +74,13 @@ services:
 
   redis:
     image: redis
+    volumes:
+      - ./config/redis.conf:/redis.conf
     networks:
       - internal
+    command:
+      - redis-server
+      - /redis.conf
 
   memcache:
     image: memcached:alpine

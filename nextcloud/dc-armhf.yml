@@ -74,8 +74,13 @@ services:
 
   redis:
     image: armhf/redis
+    volumes:
+      - ./config/redis.conf:/redis.conf
     networks:
       - internal
+    command:
+      - redis-server
+      - /redis.conf
 
   memcache:
     image: armhf/memcached:alpine
