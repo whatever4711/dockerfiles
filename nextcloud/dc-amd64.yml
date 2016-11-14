@@ -59,8 +59,6 @@ services:
       - DB_HOST=postgres
       - ADMIN_USER=admin
       - ADMIN_PASSWORD=admin
-    entrypoint: run.sh
-
 
   postgres:
     image: whatever4711/postgres:amd64
