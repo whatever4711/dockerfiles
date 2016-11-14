@@ -63,9 +63,9 @@ RUN echo "@commuedge https://nl.alpinelinux.org/alpine/edge/community" >> /etc/a
     php7-pear@commuedge \
     php7-dev@commuedge \
     php7-memcached@testing \
- && mkdir /nextcloud && cd /tmp \
+ && cd /tmp \
  && wget -q http://ftp.gnu.org/pub/gnu/libiconv/libiconv-${GNU_LIBICONV_VERSION}.tar.gz \
- && sed -i "$ s|\-n||g" /usr/bin/pecl && pecl install smbclient \ 
+ && sed -i "$ s|\-n||g" /usr/bin/pecl && pecl install smbclient \
  && tar xzf libiconv-${GNU_LIBICONV_VERSION}.tar.gz && cd libiconv-${GNU_LIBICONV_VERSION} \
  && ./configure --prefix=/usr/local \
  && wget -q https://raw.githubusercontent.com/mxe/mxe/7e231efd245996b886b501dad780761205ecf376/src/libiconv-1-fixes.patch \
