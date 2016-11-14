@@ -7,10 +7,11 @@ SHARE_DIR_1='/home/marcel/clouddata/Wedding'
 SHARE_DIR_2='/home/marcel/clouddata/Wedding'
 SHARE_1=${SHARE_HOST_1}:${SHARE_DIR_1}
 SHARE_2=${SHARE_HOST_2}:${SHARE_DIR_2}
-VOLUMES_1=( 'nc_db' 'nc_www' 'nc_config' ) 
+VOLUMES_1=( 'nc_db' 'nc_www' 'nc_config' )
 VOLUMES_2=( 'nc_data' 'nc_apps' )
 VOLUMES=( "${VOLUMES_1[@]}" "${VOLUMES_2[@]}" )
-SERVICES=( 'cloud_postgres' 'cloud_redis' 'cloud_memcache' 'cloud_nextcloud' 'cloud_ssh' )
+declare -a SERVICES
+filename=services.txt
 
 # Requires su rights
 function reset {
@@ -39,6 +40,18 @@ umount ${tmp}
 rm -rf ${tmp}
 }
 
+function getServices {
+	if [ -f ${filename} ]; then
+	  mapfile -t SERVICES < ${filename}
+	else
+	  SERVICES=()
+	fi
+}
+
+function setServices {
+	echo ${SERVICES[@]} > ${filename}
+}
+
 function createBasics {
 echo "Creating network ${NET}"
 docker network create --driver overlay ${NET}
@@ -54,35 +67,42 @@ ssh cubietruck.mg "docker volume create -d nfs --name ${VOLUMES[0]} -o share=${S
 }
 
 function createDB {
-echo "Creating DB service ${SERVICES[0]} with volume ${VOLUMES[0]}"
-docker service create --name ${SERVICES[0]} --replicas 1 --network ${NET} \
+local db=${1:-cloud_postgres}
+echo "Creating DB service ${db} with volume ${VOLUMES[0]}"
+docker service create --name ${db} --replicas 1 --network ${NET} \
 	--publish 5432:5432 \
 	--mount type=volume,src=${VOLUMES[0]},dst=/var/lib/postgresql/data \
 	--constraint 'node.hostname==cubietruck' \
 	whatever4711/postgres:armhf
+SERVICES+=("${db}")
 }
 
 function createRedis {
-echo "Creating Redis service ${SERVICES[1]}"
-docker service create --name ${SERVICES[1]} --replicas 1 --network ${NET} \
+local redis=${1:-cloud_redis}
+echo "Creating Redis service ${redis}"
+docker service create --name ${redis} --replicas 1 --network ${NET} \
 	--publish 6379:6379 \
+	--mount type=bind,src=${PWD}/config/redis.conf,dst=/redis.conf \
 	--constraint 'node.hostname!=roupi' --constraint 'node.hostname!=jack' \
-	armhf/redis
+	armhf/redis redis-server /redis.conf
+SERVICES+=("${redis}")
 }
 
 function createMemcache {
+local memcache=${1:-cloud_memcache}
 local publishedPort=${1:-11211}
-local nextName=${2:-''}
-echo "Creating Memcache service ${SERVICES[2]}${nextName}"
-docker service create --name ${SERVICES[2]}${nextName} --replicas 1 --network ${NET} \
+echo "Creating Memcache service ${memcache}"
+docker service create --name ${memcache} --replicas 1 --network ${NET} \
 	--publish ${publishedPort}:11211 \
 	--constraint 'node.hostname!=roupi' \
-	armhf/memcached:alpine
+	armhf/memcached:alpine -m 64
+SERVICES+=("${memcache}")
 }
 
 function createNextCloud {
-echo "Creating Nextcloud service ${SERVICES[3]} with volumes ${VOLUMES[1]}, ${VOLUMES[2]}, ${VOLUMES[3]}, and ${VOLUMES[4]}"
-docker service create --name ${SERVICES[3]} --replicas 1 --network ${NET} \
+local nextcloud=${1:-cloud_nextcloud}
+echo "Creating Nextcloud service ${nextcloud} with volumes ${VOLUMES[1]}, ${VOLUMES[2]}, ${VOLUMES[3]}, and ${VOLUMES[4]}"
+docker service create --name ${nextcloud} --replicas 1 --network ${NET} \
 	--publish 9000:9000 \
 	--mount type=volume,src=${VOLUMES[1]},dst=/nextcloud \
 	--mount type=volume,src=${VOLUMES[2]},dst=/config \
@@ -99,15 +119,18 @@ docker service create --name ${SERVICES[3]} --replicas 1 --network ${NET} \
 	--env ADMIN_PASSWORD=admin \
 	--constraint 'node.hostname==sparrow' \
 	whatever4711/nextcloud:armhf
+SERVICES+=("${nextcloud}")
 }
 
 function create_ssh {
-echo "Creating SSH service ${SERVICES[4]}"
-docker service create --name ${SERVICES[4]} --replicas 1 --network ${NET} \
+local ssh=${1:-cloud_ssh}
+echo "Creating SSH service ${ssh}"
+docker service create --name ${ssh} --replicas 1 --network ${NET} \
 	--publish 2222:22 \
 	--env ROOT_PASS=12wert45 \
 	--constraint 'node.hostname!=roupi' \
 	whatever4711/ssh:armhf
+SERVICE+=("${ssh}")
 }
 
 function create {
@@ -116,18 +139,24 @@ sleep 10
 createDB
 createRedis
 createMemcache
-createMemcache 11212 2
+createMemcache cloud_memcache_2 11212
+setServices
 }
 
 function start {
+getServices
 createNextCloud
+setServices
 }
 
 function debug {
+getServices
 create_ssh
+setServices
 }
 
 function destroy {
+getServices
 for service in "${SERVICES[@]}"; do
 	docker service rm ${service}
 done
@@ -138,7 +167,7 @@ for volume in "${VOLUMES[@]}"; do
 done
 sleep 10
 docker network rm ${NET}
-
+rm ${filename}
 }
 
 function usage(){

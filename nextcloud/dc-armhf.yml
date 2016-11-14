@@ -84,6 +84,7 @@ services:
 
   memcache:
     image: armhf/memcached:alpine
-    entrypoint: memcached -m 64
     networks:
       - internal
+    command:
+      - -m 64
