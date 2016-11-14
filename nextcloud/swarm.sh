@@ -90,7 +90,7 @@ SERVICES+=("${redis}")
 
 function createMemcache {
 local memcache=${1:-cloud_memcache}
-local publishedPort=${1:-11211}
+local publishedPort=${2:-11211}
 echo "Creating Memcache service ${memcache}"
 docker service create --name ${memcache} --replicas 1 --network ${NET} \
 	--publish ${publishedPort}:11211 \
