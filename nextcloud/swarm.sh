@@ -128,7 +128,7 @@ function createCaddy {
 	docker service create --name ${caddy} --replicas 1 --network ${NET} \
 		--publish 80:80 \
 		--mount type=volume,src=${VOLUMES[1]},dst=/nextcloud \
-		--mount type=bind,src=${PWD}/config/Dockerfile,dst=/root/.caddy/Caddyfile \
+		--mount type=bind,src=${PWD}/config/Caddyfile,dst=/root/.caddy/Caddyfile \
 		--constraint 'node.hostname==sparrow' \
 		whatever4711/caddy:armhf --agree --conf /root/.caddy/Caddyfile
 	SERVICES+=("${caddy}")
