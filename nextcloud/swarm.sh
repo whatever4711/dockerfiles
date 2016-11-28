@@ -122,6 +122,18 @@ docker service create --name ${nextcloud} --replicas 1 --network ${NET} \
 SERVICES+=("${nextcloud}")
 }
 
+function createCaddy {
+	local caddy=${1:-cloud_caddy}
+	echo "Creating Caddy service ${caddy} with volumes "
+	docker service create --name ${caddy} --replicas 1 --network ${NET} \
+		--publish 80:80 \
+		--mount type=volume,src=${VOLUMES[1]},dst=/nextcloud \
+		--mount type=bind,src=${PWD}/config/Dockerfile,dst=/root/.caddy/Caddyfile \
+		--constraint 'node.hostname==sparrow' \
+		whatever4711/caddy:armhf --agree --conf /root/.caddy/Caddyfile
+	SERVICES+=("${caddy}")
+}
+
 function create_ssh {
 local ssh=${1:-cloud_ssh}
 echo "Creating SSH service ${ssh}"
@@ -146,6 +158,7 @@ setServices
 function start {
 getServices
 createNextCloud
+createCaddy
 setServices
 }
 
