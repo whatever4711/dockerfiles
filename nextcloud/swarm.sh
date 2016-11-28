@@ -64,6 +64,10 @@ for volume in "${VOLUMES_2[@]}"; do
 	docker volume create -d nfs --name ${volume} -o share=${SHARE_2}/${volume}
 done
 ssh cubietruck.mg "docker volume create -d nfs --name ${VOLUMES[0]} -o share=${SHARE_1}/${VOLUMES[0]}"
+docker node update --label-add ${VOLUMES[0]} cubietruck
+ssh neo.mg "docker volume create -d nfs --name ${VOLUMES[1]} -o share=${SHARE_1}/${VOLUMES[1]}"
+docker node update --label-add nextcloud=${VOLUMES[1]} neo
+docker node update --label-add nextcloud=${VOLUMES[1]} sparrow
 }
 
 function createDB {
@@ -129,7 +133,7 @@ function createCaddy {
 		--publish 80:80 \
 		--mount type=volume,src=${VOLUMES[1]},dst=/nextcloud \
 		--mount type=bind,src=${PWD}/config/Caddyfile,dst=/root/.caddy/Caddyfile \
-		--constraint 'node.hostname==sparrow' \
+		--constraint "node.labels.nextcloud==${VOLUMES[1]}" \
 		whatever4711/caddy:armhf --agree --conf /root/.caddy/Caddyfile
 	SERVICES+=("${caddy}")
 }
