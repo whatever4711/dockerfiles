@@ -2,7 +2,7 @@
 
     root /nextcloud
 
-    fastcgi / nextcloud:9000 php {
+    fastcgi / 192.168.9.4:9000 php {
             env PATH /usr/local/bin:/usr/bin:/bin
     }
 
