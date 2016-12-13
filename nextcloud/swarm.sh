@@ -54,7 +54,7 @@ function setServices {
 
 function createBasics {
 echo "Creating network ${NET}"
-docker network create --driver overlay ${NET}
+docker network create --driver overlay --subnet=192.168.111.0/24 ${NET}
 for volume in "${VOLUMES_1[@]}"; do
 	echo "Creating volume ${volume}"
 	docker volume create -d nfs --name ${volume} -o share=${SHARE_1}/${volume}
@@ -99,7 +99,7 @@ echo "Creating Memcache service ${memcache}"
 docker service create --name ${memcache} --replicas 1 --network ${NET} \
 	--publish ${publishedPort}:11211 \
 	--constraint 'node.hostname!=roupi' \
-	armhf/memcached:alpine -m 64
+	armhf/memcached:alpine -m 256
 SERVICES+=("${memcache}")
 }
 
@@ -155,13 +155,13 @@ sleep 10
 createDB
 createRedis
 createMemcache
-createMemcache cloud_memcache_2 11212
+#createMemcache cloud_memcache_2 11212
 setServices
 }
 
 function start {
 getServices
-createNextCloud
+#createNextCloud
 createCaddy
 setServices
 }
