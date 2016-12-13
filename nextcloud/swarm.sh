@@ -3,7 +3,7 @@
 NET='cloud_net'
 SHARE_HOST_1='192.168.9.1'
 SHARE_HOST_2='192.168.9.250'
-SHARE_DIR='/home/marcel/clouddata/Wedding'
+SHARE_DIR=':/home/marcel/clouddata/Wedding'
 RESTART_DELAY='10s'
 RESTART_ATTEMPTS='5'
 VOLUMES_1=( 'nc_db' 'nc_www' 'nc_config' )
@@ -62,7 +62,7 @@ echo "Creating DB service ${db} with volume ${VOLUMES[0]}"
 docker service create --name ${db} --replicas 1 --network ${NET} \
   --restart-delay ${RESTART_DELAY} --restart-max-attempts ${RESTART_ATTEMPTS} \
 	--publish 5432:5432 \
-  --mount type=volume,volume-opt=o=addr="${SHARE_HOST_1}",volume-opt=device="${SHARE_DIR}"/${VOLUMES[0]},volume-opt=type=nfs,src=${VOLUMES[0]},dst=/var/lib/postgresql/data \
+  --mount type=volume,volume-opt=o=addr="${SHARE_HOST_1}",volume-opt=device="${SHARE_DIR}/${VOLUMES[0]}",volume-opt=type=nfs,src=${VOLUMES[0]},dst=/var/lib/postgresql/data \
 	whatever4711/postgres:armhf
 SERVICES+=("${db}")
 }
