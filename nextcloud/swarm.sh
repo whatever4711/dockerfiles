@@ -107,11 +107,12 @@ docker service create --name ${nextcloud} --replicas 1 --network ${NET} \
 	--env DB_NAME=nextcloud \
 	--env DB_USER=postgres \
 	--env DB_PASSWORD=postgres \
-	--env DB_HOST=192.168.9.3 \
-	--env REDIS_HOST=192.168.9.3 \
-	--env MEMCACHE_ARRAY="array('192.168.9.3', 11211)" \
+	--env DB_HOST=192.168.9.1 \
+	--env REDIS_HOST=192.168.9.1 \
+	--env MEMCACHE_ARRAY="array('192.168.9.1', 11211)" \
 	--env ADMIN_USER=admin \
 	--env ADMIN_PASSWORD=admin \
+	--constraint 'node.hostname!=jack' \
 	whatever4711/nextcloud:armhf
 SERVICES+=("${nextcloud}")
 }
@@ -121,7 +122,7 @@ function createCaddy {
 	echo "Creating Caddy service ${caddy} with volumes "
 	docker service create --name ${caddy} --replicas 1 --network ${NET} \
 	  --restart-delay ${RESTART_DELAY} --restart-max-attempts ${RESTART_ATTEMPTS} \
-		--publish 80:80 \
+		--publish 888:888 \
 		--mount type=volume,volume-opt=o=addr="${SHARE_HOST_1}",volume-opt=device="${SHARE_DIR_1}/${VOLUMES[1]}",volume-opt=type=nfs,src=${VOLUMES[1]},dst=/nextcloud \
 		--mount type=bind,src=${PWD}/config/Caddyfile,dst=/root/.caddy/Caddyfile \
 		whatever4711/caddy:armhf --agree --conf /root/.caddy/Caddyfile
@@ -150,7 +151,7 @@ setServices
 
 function start {
 getServices
-#createNextCloud
+createNextCloud
 createCaddy
 setServices
 }
