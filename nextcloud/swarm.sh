@@ -150,7 +150,7 @@ setServices
 
 function start {
 getServices
-createNextCloud
+#createNextCloud
 createCaddy
 setServices
 }
