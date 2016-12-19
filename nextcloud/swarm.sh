@@ -1,8 +1,7 @@
 #!/bin/bash
-
 NET='cloud_net'
 SHARE_HOST_1='192.168.9.1'
-SHARE_HOST_2='192.168.9.250'
+#SHARE_HOST_2='192.168.9.250'
 SHARE_HOST_3='192.168.9.47'
 SHARE_DIR_1=':/home/marcel/clouddata/Wedding'
 SHARE_DIR_2=':/nfs/docker'
@@ -64,6 +63,7 @@ local db=${1:-cloud_postgres}
 echo "Creating DB service ${db} with volume ${VOLUMES[0]}"
 docker service create --name ${db} --replicas 1 --network ${NET} \
   --restart-delay ${RESTART_DELAY} --restart-max-attempts ${RESTART_ATTEMPTS} \
+  --limit-cpu 0.3 --limit-memory 256M \
 	--publish 5432:5432 \
   --mount type=volume,volume-opt=o=addr="${SHARE_HOST_1}",volume-opt=device="${SHARE_DIR_1}/${VOLUMES[0]}",volume-opt=type=nfs,src=${VOLUMES[0]},dst=/var/lib/postgresql/data \
 	whatever4711/postgres:armhf
@@ -75,6 +75,7 @@ local redis=${1:-cloud_redis}
 echo "Creating Redis service ${redis}"
 docker service create --name ${redis} --replicas 1 --network ${NET} \
   --restart-delay ${RESTART_DELAY} --restart-max-attempts ${RESTART_ATTEMPTS} \
+  --limit-cpu 0.3 --limit-memory 512M \
 	--publish 6379:6379 \
 	--mount type=bind,src=${PWD}/config/redis.conf,dst=/redis.conf \
 	--constraint 'node.hostname!=jack' \
@@ -88,6 +89,7 @@ local publishedPort=${2:-11211}
 echo "Creating Memcache service ${memcache}"
 docker service create --name ${memcache} --replicas 1 --network ${NET} \
   --restart-delay ${RESTART_DELAY} --restart-max-attempts ${RESTART_ATTEMPTS} \
+  --reserve-memory 128M --limit-cpu 0.3 --limit-memory 150M \
 	--publish ${publishedPort}:11211 \
 	armhf/memcached:alpine -m 128
 SERVICES+=("${memcache}")
@@ -98,10 +100,10 @@ local nextcloud=${1:-cloud_nextcloud}
 echo "Creating Nextcloud service ${nextcloud} with volumes ${VOLUMES[1]}, ${VOLUMES[2]}, ${VOLUMES[3]}, and ${VOLUMES[4]}"
 docker service create --name ${nextcloud} --replicas 1 --network ${NET} \
   --restart-delay ${RESTART_DELAY} --restart-max-attempts ${RESTART_ATTEMPTS} \
-	--publish 9000:9000 \
+  --reserve-memory 256M --reserve-cpu 3 --limit-cpu 0.8 --limit-memory 4096M \
 	--mount type=volume,volume-opt=o=addr="${SHARE_HOST_1}",volume-opt=device="${SHARE_DIR_1}/${VOLUMES[1]}",volume-opt=type=nfs,src=${VOLUMES[1]},dst=/nextcloud \
 	--mount type=volume,volume-opt=o=addr="${SHARE_HOST_1}",volume-opt=device="${SHARE_DIR_1}/${VOLUMES[2]}",volume-opt=type=nfs,src=${VOLUMES[2]},dst=/config \
-	--mount type=volume,volume-opt=o=addr="${SHARE_HOST_2}",volume-opt=device="${SHARE_DIR_1}/${VOLUMES[3]}",volume-opt=type=nfs,src=${VOLUMES[3]},dst=/apps \
+	--mount type=volume,volume-opt=o=addr="${SHARE_HOST_1}",volume-opt=device="${SHARE_DIR_1}/${VOLUMES[3]}",volume-opt=type=nfs,src=${VOLUMES[3]},dst=/apps \
 	--mount type=volume,volume-opt=o=addr="${SHARE_HOST_3}",volume-opt=device="${SHARE_DIR_2}/${VOLUMES[4]}",volume-opt=type=nfs,src=${VOLUMES[4]},dst=/data \
 	--env DB_TYPE=pgsql \
 	--env DB_NAME=nextcloud \
@@ -122,6 +124,7 @@ function createCaddy {
 	echo "Creating Caddy service ${caddy} with volumes "
 	docker service create --name ${caddy} --replicas 1 --network ${NET} \
 	  --restart-delay ${RESTART_DELAY} --restart-max-attempts ${RESTART_ATTEMPTS} \
+	  --reserve-cpu 2 --limit-cpu 0.5 --limit-memory 64M \
 		--publish 888:888 \
 		--mount type=volume,volume-opt=o=addr="${SHARE_HOST_1}",volume-opt=device="${SHARE_DIR_1}/${VOLUMES[1]}",volume-opt=type=nfs,src=${VOLUMES[1]},dst=/nextcloud \
 		--mount type=bind,src=${PWD}/config/Caddyfile,dst=/root/.caddy/Caddyfile \
