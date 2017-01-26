@@ -1,7 +1,6 @@
-FROM alpine:3.4
-MAINTAINER Wonderfall <wonderfall@schrodinger.io>
+FROM alpine:edge
 
-ARG LYCHEE_VERSION=3.1.4
+ARG LYCHEE_VERSION=3.1.5
 ARG IMAGICK_EXT_VERSION=3.4.2
 
 ENV UID=991 GID=991
@@ -10,7 +9,7 @@ RUN echo "@commuedge https://nl.alpinelinux.org/alpine/edge/community" >> /etc/a
  && BUILD_DEPS=" \
     imagemagick-dev \
     tar \
-    openssl \
+    libressl \
     ca-certificates \
     build-base \
     autoconf \
@@ -55,5 +54,7 @@ RUN chmod +x /usr/local/bin/run.sh /etc/s6.d/*/* /etc/s6.d/.s6-svscan/*
 VOLUME /lychee/uploads /lychee/data
 
 EXPOSE 8888
+
+LABEL maintainer="Wonderfall <wonderfall@targaryen.house>"
 
 CMD ["run.sh"]

@@ -1,7 +1,6 @@
-FROM alpine:3.4
-MAINTAINER Wonderfall <wonderfall@mondedie.fr>
+FROM alpine:edge
 
-ARG VERSION=2.17.0
+ARG VERSION=3.0.1
 
 ARG GPG_matthieu="814E 346F A01A 20DB B04B  6807 B5DB D592 5590 A237"
 
@@ -14,7 +13,7 @@ RUN echo "@commuedge https://nl.alpinelinux.org/alpine/edge/community" >> /etc/a
     build-base \
     autoconf \
     geoip-dev \
-    openssl \
+    libressl \
     ca-certificates \
     gnupg" \
  && apk -U add \
@@ -23,6 +22,7 @@ RUN echo "@commuedge https://nl.alpinelinux.org/alpine/edge/community" >> /etc/a
     s6 \
     su-exec \
     geoip \
+    tzdata \
     php7-fpm@commuedge \
     php7-gd@commuedge \
     php7-curl@commuedge \
@@ -76,6 +76,7 @@ VOLUME /config
 EXPOSE 8888
 
 LABEL description "Open web analytics platform" \
-      piwik "Piwik v${VERSION}"
+      piwik "Piwik v${VERSION}" \
+      maintainer="Wonderfall <wonderfall@targaryen.house>"
 
 CMD ["run.sh"]

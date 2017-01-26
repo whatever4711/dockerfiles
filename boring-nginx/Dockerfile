@@ -1,13 +1,12 @@
 FROM alpine:edge
-MAINTAINER Wonderfall <wonderfall@schrodinger.io>
 
 ENV UID=991 GID=991
 
-ARG NGINX_VERSION=1.11.5
+ARG NGINX_VERSION=1.11.9
 ARG GPG_NGINX="B0F4 2533 73F8 F6F5 10D4  2178 520A 9993 A1C0 52F8"
 ARG BUILD_CORES
 
-COPY boring.patch /tmp/boring.patch
+COPY tls1.3.patch /tmp/tls1.3.patch
 
 RUN echo "@commuedge https://nl.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories \
  && NB_CORES=${BUILD_CORES-$(getconf _NPROCESSORS_CONF)} \
@@ -42,7 +41,9 @@ RUN echo "@commuedge https://nl.alpinelinux.org/alpine/edge/community" >> /etc/a
  && git clone https://github.com/google/ngx_brotli --depth=1 \
  && git clone https://github.com/openresty/headers-more-nginx-module --depth=1 \
  && git clone https://boringssl.googlesource.com/boringssl --depth=1 \
- && cd boringssl \
+ && cd /tmp/ngx_brotli && git submodule update --init \
+ && cd /tmp/boringssl \
+ && patch -p1 < /tmp/tls1.3.patch \
  && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release .. \
  && make -j ${NB_CORES} && cd .. \
  && mkdir -p .openssl/lib/ && cd .openssl && ln -s ../include && cd .. \
@@ -59,7 +60,6 @@ RUN echo "@commuedge https://nl.alpinelinux.org/alpine/edge/community" >> /etc/a
  && if [ "${FINGERPRINT}" != "${GPG_NGINX}" ]; then echo "Warning! Wrong GPG fingerprint!" && exit 1; fi \
  && echo "All seems good, now unpacking ${NGINX_TARBALL}..." \
  && tar xzf ${NGINX_TARBALL} && cd nginx-${NGINX_VERSION} \
- && patch -p1 < /tmp/boring.patch \
  && ./configure \
     --prefix=/etc/nginx \
     --sbin-path=/usr/sbin/nginx \
@@ -109,6 +109,7 @@ VOLUME /sites-enabled /www /conf.d /passwds /certs /var/log/nginx
 
 LABEL description="nginx built from source" \
       openssl="BoringSSL" \
-      nginx="nginx ${NGINX_VERSION}"
+      nginx="nginx ${NGINX_VERSION}" \
+      maintainer="Wonderfall <wonderfall@targaryen.house>"
 
 CMD ["run.sh"]

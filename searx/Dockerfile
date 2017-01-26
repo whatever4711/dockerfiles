@@ -1,5 +1,4 @@
-FROM alpine:3.4
-MAINTAINER Wonderfall <wonderfall@schrodinger.io>
+FROM alpine:edge
 
 ENV BASE_URL=False IMAGE_PROXY=False \
     UID=991 GID=991
@@ -8,7 +7,7 @@ RUN echo "@commuedge https://nl.alpinelinux.org/alpine/edge/community" >> /etc/a
  && BUILD_DEPS=" \
     build-base \
     python-dev \
-    py-pip \
+    py2-pip \
     libffi-dev \
     libxslt-dev \
     libxml2-dev \
@@ -35,5 +34,7 @@ COPY run.sh /usr/local/bin/run.sh
 RUN chmod +x /usr/local/bin/run.sh
 
 EXPOSE 8888
+
+LABEL maintainer="Wonderfall <wonderfall@targaryen.house>"
 
 CMD ["run.sh"]

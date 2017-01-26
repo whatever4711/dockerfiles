@@ -1,10 +1,9 @@
-FROM alpine:3.4
-MAINTAINER Wonderfall <wonderfall@schrodinger.io>
+FROM alpine:edge
 
 ENV GID=991 UID=991
 
 RUN echo "@commuedge https://nl.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories \
- && BUILD_DEPS="tar openssl ca-certificates" \
+ && BUILD_DEPS="tar libressl ca-certificates" \
  && apk -U add \
     $BUILD_DEPS \
     nginx \
@@ -31,5 +30,7 @@ RUN chmod +x /usr/local/bin/run.sh /etc/s6.d/*/* /etc/s6.d/.s6-svscan/*
 VOLUME /zerobin/data
 
 EXPOSE 8888
+
+LABEL maintainer="Wonderfall <wonderfall@targaryen.house>"
 
 CMD ["run.sh"]
