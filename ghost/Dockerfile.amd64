@@ -1,11 +1,11 @@
-FROM mhart/alpine-node-auto:6
+FROM alpine:3.5
 
 ARG GHOST_VERSION=0.11.4
 
 ENV GHOST_NODE_VERSION_CHECK=false \
     GID=991 \
     UID=991 \
-    DOMAIN=my-ghost-blog.com \
+    DOMAIN=localhost \
     SSL=False \
     SYNTAX_HIGHLIGHTING=False \
     HIGHLIGHTER_COLOR=light \
@@ -27,6 +27,7 @@ VOLUME /ghost/content
 
 RUN echo "@commuedge https://nl.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories \
  && apk -U add \
+    nodejs \
     openssl \
     ca-certificates \
     bash \
