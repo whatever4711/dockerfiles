@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 
 networks:
   internal:
@@ -42,6 +42,7 @@ services:
     depends_on:
       - postgres
       - redis
+      - memcache
     expose:
       - 9000
     networks:
@@ -59,7 +60,7 @@ services:
       - DB_HOST=postgres
       - ADMIN_USER=admin
       - ADMIN_PASSWORD=admin
-    entrypoint: run.sh
+    entrypoint: ["dockerize", "-wait", "tcp://postgres:5432", "-wait", "tcp://redis:6379", "-wait", "tcp://memcache:11211", "run.sh"]
 
 
   postgres:
@@ -81,6 +82,8 @@ services:
     command:
       - redis-server
       - /redis.conf
+    expose:
+      - 6379
 
   memcache:
     image: armhf/memcached:alpine
@@ -88,3 +91,5 @@ services:
       - internal
     command:
       - -m 64
+    expose:
+      - 11211
