@@ -1,0 +1,170 @@
+version: '3'
+
+networks:
+  internal:
+    driver: overlay
+  external:
+    driver: overlay
+
+volumes:
+  db:
+    driver: local
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.9.1"
+      device: ":/home/marcel/clouddata/Wedding/nc_db"
+  www:
+    driver: local
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.9.1"
+      device: ":/home/marcel/clouddata/Wedding/nc_www"
+  config:
+    driver: local
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.9.1"
+      device: ":/home/marcel/clouddata/Wedding/nc_config"
+  apps:
+    driver: local
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.9.1"
+      device: ":/home/marcel/clouddata/Wedding/nc_apps"
+  data:
+    driver: local
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.9.47"
+      device: ":/nfs/docker/nc_data"
+
+services:
+  postgres:
+    image: whatever4711/postgres:armhf
+    restart: always
+    volumes:
+      - db:/var/lib/postgresql/data
+    expose:
+      - 5432
+    networks:
+      - internal
+    deploy:
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 256M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  redis:
+    image: armhf/redis
+    volumes:
+      - config:/config
+    networks:
+      - internal
+    command:
+      - redis-server
+      - /config/redis.conf
+    expose:
+      - 6379
+    deploy:
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 512M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      placement:
+        constraints: [node.hostname != jack]
+
+
+  memcache:
+    image: armhf/memcached:alpine
+    networks:
+      - internal
+    command:
+      - -m 128
+    expose:
+      - 11211
+    deploy:
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 150M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  caddy:
+    image: whatever4711/caddy:armhf
+    depends_on:
+      - nextcloud
+    ports:
+      - "888:888"
+    volumes:
+      - config:/config
+      - www:/nextcloud
+    networks:
+      - internal
+      - external
+    command: --agree --conf /config/Caddyfile
+    deploy:
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  nextcloud:
+    image: whatever4711/nextcloud:armhf
+    depends_on:
+      - postgres
+      - redis
+      - memcache
+    expose:
+      - 9000
+    networks:
+      - internal
+    volumes:
+      - www:/nextcloud
+      - config:/config
+      - data:/data
+      - apps:/apps
+    environment:
+      - DB_TYPE=pgsql
+      - DB_NAME=nextcloud
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOST=postgres
+      - ADMIN_USER=admin
+      - ADMIN_PASSWORD=admin
+    entrypoint: ["dockerize", "-wait", "tcp://postgres:5432", "-wait", "tcp://redis:6379", "-wait", "tcp://memcache:11211", "run.sh"]
+    deploy:
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.8'
+          memory: 4096M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      placement:
+        constraints: [node.hostname != jack]

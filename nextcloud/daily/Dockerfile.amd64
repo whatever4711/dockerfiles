@@ -11,7 +11,8 @@ ENV UID=991 GID=991 \
     TZ=Etc/UTC \
     DB_TYPE=sqlite3 \
     ADMIN_USER=admin \
-    ADMIN_PASSWORD=admin
+    ADMIN_PASSWORD=admin \
+    ARCH=amd64
 
 RUN echo "@commuedge https://nl.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories \
  && echo "@testing https://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories \
@@ -21,7 +22,8 @@ RUN echo "@commuedge https://nl.alpinelinux.org/alpine/edge/community" >> /etc/a
     autoconf \
     automake \
     libtool \
-    samba-dev" \
+    samba-dev \
+    wget" \
  && apk -U add \
     ${BUILD_DEPS} \
     s6 \
@@ -64,6 +66,9 @@ RUN echo "@commuedge https://nl.alpinelinux.org/alpine/edge/community" >> /etc/a
     php7-dev@commuedge \
     php7-memcached@testing \
  && cd /tmp \
+ && wget -O dockerize.tar.gz https://github.com/jwilder/dockerize/releases/download/v0.3.0/dockerize-linux-${ARCH}-v0.3.0.tar.gz \
+ && tar -xzvf dockerize.tar.gz \
+ && mv dockerize /usr/local/bin/ \
  && wget -q http://ftp.gnu.org/pub/gnu/libiconv/libiconv-${GNU_LIBICONV_VERSION}.tar.gz \
  && sed -i "$ s|\-n||g" /usr/bin/pecl && pecl install smbclient \
  && tar xzf libiconv-${GNU_LIBICONV_VERSION}.tar.gz && cd libiconv-${GNU_LIBICONV_VERSION} \
