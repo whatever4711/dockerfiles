@@ -1,6 +1,6 @@
 FROM alpine AS build
 
-RUN apk add -U --no-cache gcc g++ make autoconf automake libcurl curl-dev jansson git && \
+RUN apk add -U --no-cache gcc g++ make autoconf automake libcurl curl-dev openssl-dev jansson git && \
     git clone https://github.com/lucasjones/cpuminer-multi.git
 
 WORKDIR /cpuminer-multi
@@ -9,7 +9,7 @@ RUN ./configure CFLAGS="-march=native"
 RUN make
 
 FROM alpine
-RUN apk add -U --no-cache libcurl
+RUN apk add -U --no-cache libcurl openssl-dev
 COPY --from=build /cpuminer-multi/minerd /usr/bin
 ENTRYPOINT ["minerd"]
 CMD ["--help"]
