@@ -1,0 +1,20 @@
+version: '3.0'
+networks:
+  tor:
+
+services:
+  proxy:
+    image: osminogin/tor-simple
+    expose:
+      - 9050
+    networks:
+      - tor
+
+  minergate:
+    image: whatever4711/miner:cryptonight
+    build:
+      context: .
+      dockerfile: Minergate
+    networks:
+      - tor
+    command: -x socks://proxy:9050 -a cryptonight -o stratum+tcp://fcn-xmr.pool.minergate.com:45590 -u whatever4711@gmail.com -p x
