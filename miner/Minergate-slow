@@ -1,0 +1,16 @@
+FROM alpine AS build
+
+RUN apk add -U --no-cache gcc g++ make autoconf automake libcurl curl-dev jansson git && \
+    git clone https://github.com/OhGodAPet/cpuminer-multi.git
+
+WORKDIR /cpuminer-multi
+RUN ./autogen.sh 
+RUN CFLAGS="-march=native" ./configure --disable-aes-ni
+RUN make
+
+FROM alpine
+RUN apk add -U --no-cache libcurl
+COPY --from=build /cpuminer-multi/minerd /usr/bin
+ENTRYPOINT ["minerd"]
+CMD ["--help"]
+
