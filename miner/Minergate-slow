@@ -5,7 +5,7 @@ RUN apk add -U --no-cache gcc g++ make autoconf automake libcurl curl-dev jansso
 
 WORKDIR /cpuminer-multi
 RUN ./autogen.sh 
-RUN CFLAGS="-march=native"
+RUN ./configure CFLAGS="-march=native"
 RUN make
 
 FROM alpine
