@@ -1,0 +1,18 @@
+FROM ubuntu 
+
+RUN apt-get update && \
+    apt-get install -y git build-essential cmake libuv1-dev uuid-dev && \
+    git clone https://github.com/xmrig/xmrig.git
+WORKDIR /xmrig
+RUN mkdir build && cd build && \
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DUV_LIBRARY=/usr/lib/x86_64-linux-gnu/libuv.a && \
+    make
+WORKDIR /xmrig/build
+
+
+#FROM alpine
+#RUN apk add -U --no-cache libcurl openssl-dev
+#COPY --from=build /cpuminer-multi/minerd /usr/bin
+#ENTRYPOINT ["minerd"]
+#CMD ["--help"]
+
