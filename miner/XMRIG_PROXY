@@ -4,20 +4,20 @@ RUN   apk --no-cache upgrade && \
         git \
         cmake \
         libuv-dev \
-        build-base
-RUN   git clone https://github.com/xmrig/xmrig
-WORKDIR xmrig
-RUN sed -i -e "s/kDonateLevel = 5/kDonateLevel = 0/g" src/donate.h 
+        build-base \
+        util-linux-dev
+RUN   git clone https://github.com/xmrig/xmrig-proxy.git
+WORKDIR xmrig-proxy
 RUN   mkdir build && \
       cmake -DCMAKE_BUILD_TYPE=Release . && \
       make
 
 FROM alpine:latest
 RUN adduser -S -D -H -h /xmrig miner && \
-    apk add -U --no-cache libuv
+    apk add -U --no-cache libuv libuuid
 USER miner
-COPY --from=build /xmrig/xmrig /usr/bin
-ENTRYPOINT  ["xmrig"]
+COPY --from=build /xmrig-proxy/xmrig-proxy /usr/bin
+ENTRYPOINT  ["xmrig-proxy"]
 
 
 #FROM alpine
