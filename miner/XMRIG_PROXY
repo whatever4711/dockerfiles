@@ -1,16 +1,10 @@
-FROM  alpine:latest AS build
-RUN   apk --no-cache upgrade && \
-      apk --no-cache add \
-        git \
-        cmake \
-        libuv-dev \
-        build-base \
-        util-linux-dev
-RUN   git clone https://github.com/xmrig/xmrig-proxy.git
+FROM alpine:latest AS build
+RUN apk add -U --no-cache git cmake libuv-dev build-base util-linux-dev
+RUN git clone https://github.com/xmrig/xmrig-proxy.git
 WORKDIR xmrig-proxy
-RUN   mkdir build && \
-      cmake -DCMAKE_BUILD_TYPE=Release . && \
-      make
+RUN mkdir build && \
+    cmake -DCMAKE_BUILD_TYPE=Release . && \
+    make
 
 FROM alpine:latest
 RUN adduser -S -D -H -h /xmrig miner && \
@@ -18,11 +12,4 @@ RUN adduser -S -D -H -h /xmrig miner && \
 USER miner
 COPY --from=build /xmrig-proxy/xmrig-proxy /usr/bin
 ENTRYPOINT  ["xmrig-proxy"]
-
-
-#FROM alpine
-#RUN apk add -U --no-cache libcurl openssl-dev
-#COPY --from=build /cpuminer-multi/minerd /usr/bin
-#ENTRYPOINT ["minerd"]
-#CMD ["--help"]
-
+CMD ["--help"]
