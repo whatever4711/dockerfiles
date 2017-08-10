@@ -5,4 +5,4 @@ services:
     image: whatever4711/miner:xmrig
     restart: unless-stopped
     read_only: true
-    command: -o stratum+tcp://141.13.92.68:47012 -u whatever4711@gmail.com -p x --nicehash --max-cpu-usage=100 --print-time=60
+    command: -o stratum+tcp://141.13.92.68:47012 -u whatever4711@gmail.com -p x --nicehash --max-cpu-usage=100 --print-time=60 --av=1 -t 7 -a cryptonight-lite
