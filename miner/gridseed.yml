@@ -1,0 +1,23 @@
+version: '3.0'
+networks:
+  tor:
+
+services:
+  proxy:
+    build:
+      context: .
+      dockerfile: Tor
+    expose:
+      - 9050
+    networks:
+      - tor
+
+  gridseed:
+    image: whatever4711/miner:gridseed
+    privileged: true
+    build:
+      context: .
+      dockerfile: Gridseed
+    networks:
+      - tor
+    command: -D --socks-proxy="socks://proxy:9050" --scrypt -o stratum+tcp://ltc.pool.minergate.com:3336 -u whatever4711@gmail.com -p x  --gridseed-options=baud=115200,freq=250,usefifo=0

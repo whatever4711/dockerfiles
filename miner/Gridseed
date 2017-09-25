@@ -1,0 +1,17 @@
+FROM armhf/alpine AS build
+
+RUN apk add -U --no-cache build-base musl-dev libc-dev eudev eudev-dev eudev-libs ncurses-libs gcc g++ make autoconf automake libcurl curl-dev jansson git
+RUN git clone https://github.com/dmaxl/cgminer.git /cpuminer
+WORKDIR /cpuminer
+RUN apk add -U --no-cache libtool 
+RUN ./autogen.sh 
+RUN apk add -U --no-cache linux-headers
+RUN ./configure --enable-scrypt --enable-gridseed
+RUN make
+
+FROM armhf/alpine
+RUN apk add -U --no-cache libcurl eudev-libs
+COPY --from=build /cpuminer/cgminer /usr/bin
+ENTRYPOINT ["cgminer"]
+CMD ["--help"]
+

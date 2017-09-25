@@ -60,7 +60,7 @@ services:
       - DB_HOST=postgres
       - ADMIN_USER=admin
       - ADMIN_PASSWORD=admin
-    entrypoint: ["dockerize", "-wait", "tcp://postgres:5432", "-wait", "tcp://redis:6379", "-wait", "tcp://memcache:11211", "run.sh"]
+    entrypoint: ["dockerize", "-wait", "tcp://postgres:5432", "-wait", "tcp://redis:6379", "-wait", "tcp://memcache:11211", "-timeout", "3600s", "run.sh"]
 
 
   postgres:
