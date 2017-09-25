@@ -20,4 +20,6 @@ services:
       dockerfile: Gridseed
     networks:
       - tor
-    command: -D --socks-proxy="socks://proxy:9050" --scrypt -o stratum+tcp://ltc.pool.minergate.com:3336 -u whatever4711@gmail.com -p x  --gridseed-options=baud=115200,freq=250,usefifo=0
+    command: --freq=800 --algo=scrypt -G /dev/ttyACM0 -o stratum+tcp://ltc.pool.minergate.com:3336 -u whatever4711@gmail.com -p x --proxy="socks5://proxy:9050"
+#    command: -D --socks-proxy="socks://proxy:9050" --scrypt -o stratum+tcp://ltc.pool.minergate.com:3336 -u whatever4711@gmail.com -p x 
+      #--gridseed-options=baud=115200,freq=250,usefifo=0

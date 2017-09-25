@@ -17,4 +17,10 @@ services:
       dockerfile: Minergate
     networks:
       - tor
+    depends_on:
+      - proxy
+    logging:
+      options:
+        max-size: "200k"
+        max-file: "2"
     command: -x socks://proxy:9050 -a cryptonight -o stratum+tcp://fcn-xmr.pool.minergate.com:45590 -u whatever4711@gmail.com -p x
