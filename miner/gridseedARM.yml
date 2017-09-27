@@ -12,7 +12,7 @@ services:
     networks:
       - tor
 
-  sha256:
+  gridseed:
     image: whatever4711/miner:gridseed-armhf
     privileged: true
     depends_on:
@@ -28,39 +28,6 @@ services:
       - 3350/udp
     networks:
       - tor
-    entrypoint: cgminer
-    command: --gridseed-options=baud115200,freq=800,chips=5,modules=1,usefifo=0,btc=16 --hotplug=0 -o stratum+tcp://eu.multipool.us:8888 -u whatever4711.1 -p x --socks-proxy="proxy:9050" --usb 001:022 
+    entrypoint: ./start.sh 
+    command: -b stratum+tcp://eu.multipool.us:3360
   
-  scrypt:
-    image: whatever4711/miner:gridseed-armhf
-    privileged: true
-    depends_on:
-      - proxy
-      - sha256
-    build:
-      context: .
-      dockerfile: GridseedARM
-    logging:
-      options:
-        max-size: "100k"
-        max-file: "2"
-    networks:
-      - tor
-    entrypoint: minerd
-    command: --algo=scrypt -F 800 -G /dev/ttyACM0 -o stratum+tcp://ltc.pool.minergate.com:3336 -u whatever4711@gmail.com -p x --proxy="socks5://proxy:9050" --dual
-#  gridseed2:
-#    image: whatever4711/miner:gridseed
-#    privileged: true
-#    depends_on:
-#      - proxy
-#    build:
-#      context: .
-#      dockerfile: GridseedARM
-#    logging:
-#      options:
-#        max-size: "100k"
-#        max-file: "2"
-#    networks:
-#      - tor
-#    entrypoint: minerd
-#    command: --algo=scrypt -F 800 -G /dev/ttyACM0 -o stratum+tcp://ltc.pool.minergate.com:3336 -u whatever4711@gmail.com -p x --proxy="socks5://proxy:9050"

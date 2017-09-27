@@ -15,6 +15,7 @@ FROM armhf/alpine
 RUN apk add -U --no-cache libcurl eudev-libs
 COPY --from=build /cpuminer/software/cpuminer/minerd /usr/bin
 COPY --from=build /cpuminer/software/cgminer/cgminer /usr/bin
+COPY start.sh /start.sh
 ENTRYPOINT ["minerd"]
 CMD ["--help"]
 
