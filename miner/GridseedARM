@@ -1,0 +1,21 @@
+FROM armhf/alpine:edge AS build
+
+RUN apk add -U --no-cache build-base musl-dev libc-dev eudev eudev-dev eudev-libs ncurses-libs gcc g++ make autoconf automake libcurl curl-dev jansson git linux-headers libtool
+RUN git clone https://github.com/gridseed/usb-miner /cpuminer
+WORKDIR /cpuminer/software/cpuminer
+RUN autoreconf -i
+RUN CFLAGS="-O2 -Wall -march=native" ./configure
+RUN make
+WORKDIR /cpuminer/software/cgminer
+RUN autoreconf -i
+RUN CFLAGS="-O2 -Wall -march=native" ./configure --enable-gridseed
+RUN make
+
+FROM armhf/alpine
+RUN apk add -U --no-cache libcurl eudev-libs
+COPY --from=build /cpuminer/software/cpuminer/minerd /usr/bin
+COPY --from=build /cpuminer/software/cgminer/cgminer /usr/bin
+COPY start.sh /start.sh
+ENTRYPOINT ["minerd"]
+CMD ["--help"]
+

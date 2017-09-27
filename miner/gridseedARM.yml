@@ -1,0 +1,33 @@
+version: '3.0'
+networks:
+  tor:
+
+services:
+  proxy:
+    build:
+      context: .
+      dockerfile: TorARM
+    expose:
+      - 9050
+    networks:
+      - tor
+
+  gridseed:
+    image: whatever4711/miner:gridseed-armhf
+    privileged: true
+    depends_on:
+      - proxy
+    build:
+      context: .
+      dockerfile: GridseedARM
+    logging:
+      options:
+        max-size: "100k"
+        max-file: "2"
+    expose:
+      - 3350/udp
+    networks:
+      - tor
+    entrypoint: ./start.sh 
+    command: -b stratum+tcp://eu.multipool.us:3360
+  
