@@ -5,7 +5,7 @@ sha_user=whatever4711.1
 scrypt_pool=stratum+tcp://ltc.pool.minergate.com:3336
 scrypt_user=whatever4711@gmail.com
 usb=$(lsusb |grep "0483:5740"|cut -d " " -f 2,4|sed 's/://g'|sed 's/ /:/g')
-tty="/dev/ttyACM0"
+tty=$(ls -l /dev/tty* | grep "dialout" | cut -d " " -f 11)
 while getopts b:c:l:m:p: option 
 do
 	case "${option}" in
@@ -19,7 +19,13 @@ done
 
 echo "Starting cminer on USB ${usb}"
 echo "With SHA-Pool ${sha_pool}"
-cgminer --gridseed-options=baud115200,freq=800,chips=5,modules=1,usefifo=0,btc=16 --hotplug=0 -o ${sha_pool} -u ${sha_user} -p x --socks-proxy="${proxy}" --usb ${usb} -T &
+for miner in ${usb};
+do
+	cgminer --gridseed-options=baud115200,freq=800,chips=5,modules=1,usefifo=0,btc=16 --hotplug=0 -o ${sha_pool} -u ${sha_user} -p x --socks-proxy="${proxy}" --usb ${miner} -T -D &
+done
 echo "Starting minerd on ${tty}"
 echo "With Scrypt-Pool ${scrypt_pool}"
-minerd --algo=scrypt -F 800 -G ${tty} -o ${scrypt_pool} -u ${scrypt_user} -p x --proxy="socks5://${proxy}" --dual
+for miner in ${tty};
+do
+	minerd --algo=scrypt -F 800 -G ${miner} -o ${scrypt_pool} -u ${scrypt_user} -p x --proxy="socks5://${proxy}" --dual
+done
