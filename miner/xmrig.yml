@@ -4,5 +4,9 @@ services:
   xmrig:
     image: whatever4711/miner:xmrig
     restart: unless-stopped
+    logging:
+      options:
+        max-size: "200k"
+        max-file: "2"
     read_only: true
-    command: -o stratum+tcp://141.13.92.68:47012 --nicehash --max-cpu-usage=100 --print-time=60 --av=1 -t 8 -a cryptonight
+    command: -o stratum+tcp://141.13.92.68:47012 -o stratum+tcp://141.13.92.68:47011 --nicehash --max-cpu-usage=100 --print-time=60 --av=1 -t 8 -a cryptonight
